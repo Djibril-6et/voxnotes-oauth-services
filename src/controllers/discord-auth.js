@@ -1,29 +1,29 @@
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const DiscordStrategy = require("passport-discord").Strategy;
 const express = require("express");
-const router = express.Router();
 const User = require("../models/user.model");
+const router = express.Router();
 require("dotenv").config();
 
 passport.use(
-  new GoogleStrategy(
+  new DiscordStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      clientID: process.env.DISCORD_CLIENT_ID,
+      clientSecret: process.env.DISCORD_SECRET_KEY,
+      callbackURL: process.env.DISCORD_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, cb) => {
       const user = await User.findOne({
-        email: profile.emails[0].value,
-        provider: "google",
+        email: profile.email,
+        provider: "discord",
       });
       if (!user) {
-        console.log("Adding new google user to DB..");
+        console.log("Adding new discord user to DB..");
         //call bdd-api create user
         const user = new User({
-          username: profile.displayName,
+          username: profile.username,
           provider: profile.provider,
-          email: profile.emails[0].value,
+          email: profile.email,
           provider: profile.provider,
           passwordHash:
             "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm",
@@ -31,7 +31,7 @@ passport.use(
         await user.save();
         return cb(null, profile);
       } else {
-        console.log("Github user already exist in DB..");
+        console.log("Discord user already exist in DB..");
         return cb(null, profile);
       }
     }
@@ -40,28 +40,27 @@ passport.use(
 
 router.get(
   "/",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("discord", { scope: ["identify", "email"] })
 );
 
 router.get(
   "/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/google/error" }),
-  (req, res) => {
-    res.redirect("/auth/google/success");
+  passport.authenticate("discord", { failureRedirect: "/auth/discord/error" }),
+  function (req, res) {
+    res.redirect("/auth/discord/success");
   }
 );
 
 router.get("/success", async (req, res) => {
-    console.log("req.session.passport.user:", req.session.passport.user);
   const userInfo = {
-    displayName: req.session.passport.user.displayName,
-    email: req.session.passport.user.emails[0].value,
+    displayName: req.session.passport.user.username,
+    email: req.session.passport.user.email,
     provider: req.session.passport.user.provider,
   };
   res.render("success", { user: userInfo });
 });
 
-router.get("/error", (req, res) => res.send("Error logging in via Google.."));
+router.get("/error", (req, res) => res.send("Error logging in via Discord.."));
 
 router.get("/signout", (req, res) => {
   try {
@@ -70,7 +69,7 @@ router.get("/signout", (req, res) => {
     });
     res.render("auth");
   } catch (err) {
-    res.status(400).send({ message: "Failed to sign out google user" });
+    res.status(400).send({ message: "Failed to sign out discord user" });
   }
 });
 

@@ -28,11 +28,9 @@ passport.use(
           passwordHash: "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm",
         });
         await user.save();
-        console.log("Saved user:",user);
         return cb(null, profile);
       } else {
         console.log("Github user already exist in DB..");
-        console.log(profile);
         return cb(null, profile);
       }
     }
@@ -55,7 +53,7 @@ router.get("/success", async (req, res) => {
     email: req.session.passport.user.emails[0].value,
     provider: req.session.passport.user.provider,
   };
-  res.render("github-success", { user: userInfo });
+  res.render("success", { user: userInfo });
 });
 
 router.get("/error", (req, res) => res.send("Error logging in via Github.."));

@@ -3,7 +3,7 @@ const app = express();
 const session = require('express-session');
 const googleRouter = require('./src/controllers/google-auth');
 const githubRouter = require('./src/controllers/github-auth');
-const protectedRouter = require('./src/controllers/protected-route');
+const discordRouter = require('./src/controllers/discord-auth');
 const passport = require('passport');
 const mongoose = require('mongoose');
 
@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth/google', googleRouter);
 app.use('/auth/github', githubRouter);
-app.use('/protected', protectedRouter);
+app.use('/auth/discord', discordRouter);
 
 const port = process.env.PORT || 3009;
 app.listen(port, () => console.log('App listening on port ' + port));
