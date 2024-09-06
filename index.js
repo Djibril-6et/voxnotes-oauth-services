@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const session = require('express-session');
+const googleRouter = require('./src/controllers/google-auth');
 const githubRouter = require('./src/controllers/github-auth');
 const protectedRouter = require('./src/controllers/protected-route');
 const passport = require('passport');
@@ -43,6 +44,7 @@ app.get('/', (req, res) => {
   res.render('auth');
 });
 
+app.use('/auth/google', googleRouter);
 app.use('/auth/github', githubRouter);
 app.use('/protected', protectedRouter);
 
