@@ -43,7 +43,10 @@ router.get(
   "/callback",
   passport.authenticate("github", { failureRedirect: "/auth/github/error" }),
   function (req, res) {
-    res.redirect("/auth/github/success");
+    const username = req.session.passport.user.username;
+    const email = req.session.passport.user.emails[0].value;
+    const provider = req.session.passport.user.provider;
+    res.redirect(`http://localhost:3000/profile?provider=${provider}&username=${username}&email=${email}`);
   }
 );
 
@@ -63,7 +66,7 @@ router.get("/signout", (req, res) => {
     req.session.destroy(function (err) {
       console.log("session destroyed.");
     });
-    res.render("auth");
+    res.status(200);
   } catch (err) {
     res.status(400).send({ message: "Failed to sign out github user" });
   }

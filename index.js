@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const session = require('express-session');
 const googleRouter = require('./src/controllers/google-auth');
 const githubRouter = require('./src/controllers/github-auth');
@@ -8,6 +9,8 @@ const passport = require('passport');
 const mongoose = require('mongoose');
 
 require('dotenv').config();
+
+app.use(cors());
 
 app.set('view engine', 'ejs');
 

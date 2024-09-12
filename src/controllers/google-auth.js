@@ -46,8 +46,11 @@ router.get(
 router.get(
   "/callback",
   passport.authenticate("google", { failureRedirect: "/auth/google/error" }),
-  (req, res) => {
-    res.redirect("/auth/google/success");
+  function (req, res) {
+    const username = req.session.passport.user.displayName;
+    const email = req.session.passport.user.emails[0].value;
+    const provider = req.session.passport.user.provider;
+    res.redirect(`http://localhost:3000/profile?provider=${provider}&username=${username}&email=${email}`);
   }
 );
 
@@ -68,7 +71,7 @@ router.get("/signout", (req, res) => {
     req.session.destroy(function (err) {
       console.log("session destroyed.");
     });
-    res.render("auth");
+    res.status(200);
   } catch (err) {
     res.status(400).send({ message: "Failed to sign out google user" });
   }
