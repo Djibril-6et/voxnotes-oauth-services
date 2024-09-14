@@ -1,7 +1,6 @@
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const express = require("express");
-const User = require("../models/user.model");
 const router = express.Router();
 require("dotenv").config();
 
@@ -13,26 +12,35 @@ passport.use(
       callbackURL: process.env.DISCORD_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, cb) => {
-      const user = await User.findOne({
-        email: profile.email,
-        provider: "discord",
-      });
-      if (!user) {
-        console.log("Adding new discord user to DB..");
-        //call bdd-api create user
-        const user = new User({
-          username: profile.username,
-          provider: profile.provider,
+      try {
+        // Call db-api to check if user exists
+        const checkUserResponse = await axios.post('http://localhost:9090/users/check', {
           email: profile.email,
-          provider: profile.provider,
-          passwordHash:
-            "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm",
+          provider: 'discord',
         });
-        await user.save();
+
+        let user = checkUserResponse.data.user;
+
+        if (!user) {
+          console.log("Adding new discord user to DB..");
+          
+          // Call db-api to create a new user
+          const createUserResponse = await axios.post('http://localhost:9090/users/register', {
+            username: profile.username,
+            email: profile.emails[0].value,
+            provider: 'github',
+            password: "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm", // use a dummy hash for OAuth users
+          });
+
+          user = createUserResponse.data.user;
+        } else {
+          console.log("Discord user already exists in DB..");
+        }
+
         return cb(null, profile);
-      } else {
-        console.log("Discord user already exist in DB..");
-        return cb(null, profile);
+      } catch (error) {
+        console.error('Error during GitHub OAuth:', error);
+        return cb(error);
       }
     }
   )

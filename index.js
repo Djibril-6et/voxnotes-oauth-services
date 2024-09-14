@@ -6,24 +6,12 @@ const googleRouter = require('./src/controllers/google-auth');
 const githubRouter = require('./src/controllers/github-auth');
 const discordRouter = require('./src/controllers/discord-auth');
 const passport = require('passport');
-const mongoose = require('mongoose');
 
 require('dotenv').config();
 
 app.use(cors());
 
 app.set('view engine', 'ejs');
-
-const connectToMongoDb = () => {
-  mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDb..'))
-    .catch((error) => {
-      console.log('Error in connecting to mongoDB ' + error);
-      throw error;
-    });
-};
-connectToMongoDb();
 
 app.use(
   session({

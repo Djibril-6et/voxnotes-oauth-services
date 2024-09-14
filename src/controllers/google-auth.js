@@ -13,26 +13,35 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, cb) => {
-      const user = await User.findOne({
-        email: profile.emails[0].value,
-        provider: "google",
-      });
-      if (!user) {
-        console.log("Adding new google user to DB..");
-        //call bdd-api create user
-        const user = new User({
-          username: profile.displayName,
-          provider: profile.provider,
+      try {
+        // Call db-api to check if user exists
+        const checkUserResponse = await axios.post('http://localhost:9090/users/check', {
           email: profile.emails[0].value,
-          provider: profile.provider,
-          passwordHash:
-            "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm",
+          provider: "google",
         });
-        await user.save();
+
+        let user = checkUserResponse.data.user;
+
+        if (!user) {
+          console.log("Adding new google user to DB..");
+          
+          // Call db-api to create a new user
+          const createUserResponse = await axios.post('http://localhost:9090/users/register', {
+            username: profile.username,
+            email: profile.emails[0].value,
+            provider: profile.provider,
+            password: "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm", // use a dummy hash for OAuth users
+          });
+
+          user = createUserResponse.data.user;
+        } else {
+          console.log("Google user already exists in DB..");
+        }
+
         return cb(null, profile);
-      } else {
-        console.log("Github user already exist in DB..");
-        return cb(null, profile);
+      } catch (error) {
+        console.error('Error during Google OAuth:', error);
+        return cb(error);
       }
     }
   )

@@ -13,25 +13,35 @@ passport.use(
       callbackURL: process.env.GITHUB_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, cb) => {
-      const user = await User.findOne({
-        email: profile.emails[0].value,
-        provider: 'github',
-      });
-      if (!user) {
-        console.log("Adding new github user to DB..");
-        //call bdd-api create user
-        const user = new User({
-          username: profile.username,
-          provider: profile.provider,
+      try {
+        // Call db-api to check if user exists
+        const checkUserResponse = await axios.post('http://localhost:9090/users/check', {
           email: profile.emails[0].value,
-          provider: profile.provider,
-          passwordHash: "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm",
+          provider: 'github',
         });
-        await user.save();
+
+        let user = checkUserResponse.data.user;
+
+        if (!user) {
+          console.log("Adding new GitHub user to DB..");
+          
+          // Call db-api to create a new user
+          const createUserResponse = await axios.post('http://localhost:9090/users/register', {
+            username: profile.username,
+            email: profile.emails[0].value,
+            provider: 'github',
+            password: "$2a$10$edanz0LM3iu3GqzqYhrdvOg7.byqfMGdf/RvC11eO9f/3xterEstm", // use a dummy hash for OAuth users
+          });
+
+          user = createUserResponse.data.user;
+        } else {
+          console.log("GitHub user already exists in DB..");
+        }
+
         return cb(null, profile);
-      } else {
-        console.log("Github user already exist in DB..");
-        return cb(null, profile);
+      } catch (error) {
+        console.error('Error during GitHub OAuth:', error);
+        return cb(error);
       }
     }
   )
