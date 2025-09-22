@@ -32,8 +32,8 @@ OAuth 2.0 microservice handling secure user authentication and authorization for
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd oauth-service
+git clone https://github.com/Djibril-6et/voxnotes-oauth-services.git
+cd voxnotes-oauth-service
 ```
 
 2. **Install dependencies**
