@@ -41,13 +41,6 @@ cd voxnotes-oauth-services
 npm install
 ```
 
-## 🤝 Integration with Other Services
-
-This service integrates with:
-- **Database Service (9090):** User registration and validation
-- **[Frontend Application](https://github.com/Djibril-6et/voxnotes):** Success/error redirects to port 9010
-- **OAuth Providers:** Google, GitHub, Discord APIs
-
 3. **Environment Setup**
 Create a `.env` file in the root directory:
 ```env
@@ -69,6 +62,13 @@ DISCORD_CLIENT_ID=your_discord_client_id
 DISCORD_SECRET_KEY=your_discord_secret_key
 DISCORD_CALLBACK_URL=http://localhost:9020/auth/discord/callback
 ```
+
+## 🤝 Integration with Other Services
+
+This service integrates with:
+- **Database Service (9090):** User registration and validation
+- **[Frontend Application](https://github.com/Djibril-6et/voxnotes):** Success/error redirects to port 9010
+- **OAuth Providers:** Google, GitHub, Discord APIs
 
 ## 🔧 OAuth App Configuration
 
