@@ -41,6 +41,13 @@ cd voxnotes-oauth-services
 npm install
 ```
 
+## 🤝 Integration with Other Services
+
+This service integrates with:
+- **Database Service (9090):** User registration and validation
+- **[Frontend Application](https://github.com/Djibril-6et/voxnotes):** Success/error redirects to port 9010
+- **OAuth Providers:** Google, GitHub, Discord APIs
+
 3. **Environment Setup**
 Create a `.env` file in the root directory:
 ```env
